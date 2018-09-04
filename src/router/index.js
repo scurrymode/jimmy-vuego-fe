@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
-import Cartalog from '@/components/Cartalog'
+import Inventory from '@/components/Inventory'
 
 Vue.use(Router)
 
@@ -13,9 +13,9 @@ export default new Router({
       component: HelloWorld
     },
     {
-      path: '/cartalog',
-      name: 'cartalog',
-      component: Cartalog
+      path: '/inventory',
+      name: 'inventory',
+      component: Inventory
     }
   ]
 })
