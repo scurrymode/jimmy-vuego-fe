@@ -1,113 +1,220 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Inventory</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
+  <v-app id="inspire">
+    <v-navigation-drawer
+      v-model="drawer"
+      fixed
+      app
+    >
+      <v-list dense>
+        <img src="../assets/Vuego-logo.png">
+        <v-list-tile @click="movePage('home')">
+          <v-list-tile-action>
+            <v-icon>home</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Home</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile @click="movePage('home')">
+          <v-list-tile-action>
+            <v-icon>contact_mail</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Contact</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
+    <v-toolbar color="indigo" dark fixed app>
+      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-title>Vuego</v-toolbar-title>
+    </v-toolbar>
+    <v-content>
+      <v-container fluid fill-height>
+        <v-layout
+          justify-center
         >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
-  </div>
+          <v-flex text-xs-center>
+            <v-data-table
+            :headers="headers"
+            :items="desserts"
+            hide-actions
+            class="elevation-1"
+            >
+              <template slot="items" slot-scope="props">
+                <td>{{ props.item.name }}</td>
+                <td class="text-xs-right">{{ props.item.calories }}</td>
+                <td class="text-xs-right">{{ props.item.fat }}</td>
+                <td class="text-xs-right">{{ props.item.carbs }}</td>
+                <td class="text-xs-right">{{ props.item.protein }}</td>
+                <td class="text-xs-right">{{ props.item.iron }}</td>
+              </template>
+            </v-data-table>
+          </v-flex>
+        </v-layout>
+        <v-btn @click="createPdf">pdf</v-btn>
+      </v-container>
+    </v-content>
+    <v-footer color="indigo" app>
+      <span class="white--text">&copy; 2017</span>
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
+/* eslint-disable */
+var jsPDF = require('jspdf');
+require('jspdf-autotable');
+
 export default {
-  name: 'HelloWorld',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
+  data: () => ({
+    drawer: null,
+    headers: [
+          {
+            text: 'Dessert (100g serving)',
+            align: 'left',
+            sortable: false,
+            value: 'name'
+          },
+          { text: 'Calories', value: 'calories' },
+          { text: 'Fat (g)', value: 'fat' },
+          { text: 'Carbs (g)', value: 'carbs' },
+          { text: 'Protein (g)', value: 'protein' },
+          { text: 'Iron (%)', value: 'iron' }
+        ],
+        desserts: [
+          {
+            value: false,
+            name: 'Frozen Yogurt',
+            calories: 159,
+            fat: 6.0,
+            carbs: 24,
+            protein: 4.0,
+            iron: '1%'
+          },
+          {
+            value: false,
+            name: 'Ice cream sandwich',
+            calories: 237,
+            fat: 9.0,
+            carbs: 37,
+            protein: 4.3,
+            iron: '1%'
+          },
+          {
+            value: false,
+            name: 'Eclair',
+            calories: 262,
+            fat: 16.0,
+            carbs: 23,
+            protein: 6.0,
+            iron: '7%'
+          },
+          {
+            value: false,
+            name: 'Cupcake',
+            calories: 305,
+            fat: 3.7,
+            carbs: 67,
+            protein: 4.3,
+            iron: '8%'
+          },
+          {
+            value: false,
+            name: 'Gingerbread',
+            calories: 356,
+            fat: 16.0,
+            carbs: 49,
+            protein: 3.9,
+            iron: '16%'
+          },
+          {
+            value: false,
+            name: 'Jelly bean',
+            calories: 375,
+            fat: 0.0,
+            carbs: 94,
+            protein: 0.0,
+            iron: '0%'
+          },
+          {
+            value: false,
+            name: 'Lollipop',
+            calories: 392,
+            fat: 0.2,
+            carbs: 98,
+            protein: 0,
+            iron: '2%'
+          },
+          {
+            value: false,
+            name: 'Honeycomb',
+            calories: 408,
+            fat: 3.2,
+            carbs: 87,
+            protein: 6.5,
+            iron: '45%'
+          },
+          {
+            value: false,
+            name: 'Donut',
+            calories: 452,
+            fat: 25.0,
+            carbs: 51,
+            protein: 4.9,
+            iron: '22%'
+          },
+          {
+            value: false,
+            name: 'KitKat',
+            calories: 518,
+            fat: 26.0,
+            carbs: 65,
+            protein: 7,
+            iron: '6%'
+          }
+        ]
+  }),
+  props: {
+    source: String
+  },
+  methods: {
+    movePage (dest) {
+      this.$router.replace('/')
+    },
+    createPdf () {
+      var columns = [
+        {title: 'ID', dataKey: 'id'},
+        {title: 'Name', dataKey: 'name'},
+        {title: 'Country', dataKey: 'country'}
+      ]
+      var rows = [
+        {'id': 1, 'name': 'Shaw', 'country': 'Tanzania'},
+        {'id': 2, 'name': 'Nelson', 'country': 'Kazakhstan'},
+        {'id': 3, 'name': 'Garcia', 'country': 'Madagascar'}
+      ]
+      var doc = new jsPDF('p', 'pt')
+      doc.autoTable(columns, rows, {
+        styles: {fillColor: [100, 255, 255]},
+        columnStyles: {
+          id: {fillColor: 255}
+        },
+        margin: {top: 60},
+        addPageContent: function (data) {
+          doc.text('Header', 40, 30)
+        }
+      })
+      // doc.save('table.pdf')
+      // doc.output('dataurlnewwindow',{})
+      var string = doc.output('datauristring');
+      var iframe = "<iframe width='100%' height='100%' src='" + string + "'></iframe>"
+      var x = window.open();
+      x.document.open();
+      x.document.write(iframe);
+      x.document.close();
+
+
     }
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
