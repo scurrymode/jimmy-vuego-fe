@@ -58,8 +58,8 @@
             class="elevation-1"
             >
               <template slot="items" slot-scope="props">
-                <td ><v-checkbox @change="checkboxChaged(props.item.no)"></v-checkbox></td>
-                <td>{{ props.item.no }}</td>
+                <td ><v-checkbox v-model="checkbox[props.index]"></v-checkbox></td>
+                <td>{{ props.index+1 }}</td>
                 <td>{{ props.item.vin }}</td>
                 <td class="text-xs-right">{{ props.item.model }}</td>
                 <td class="text-xs-right">{{ props.item.make }}</td>
@@ -84,7 +84,7 @@
                     +
                   </v-btn>
                   <v-card>
-                    <v-form>
+                    <v-form id="form">
                     <v-card-title
                       class="headline grey lighten-2"
                       primary-title
@@ -157,7 +157,7 @@
                       <v-btn
                         color="danger"
                         flat
-                        @click="dialog = false"
+                        @click="cancel"
                       >
                         CANCEL
                       </v-btn>
@@ -180,108 +180,123 @@
 <script>
 import axios from 'axios'
 
-/* eslint-disable */
-var jsPDF = require('jspdf');
-require('jspdf-autotable');
+var JsPDF = require('jspdf')
+require('jspdf-autotable')
 
 export default {
   data: () => ({
-    dialog:false,
+    dialog: false,
     drawer: null,
     headers: [
-      { text: '', align: 'left', value: 'check', sortable:false},
-      { text: 'No', align: 'left', value: 'no'},
-      { text: 'Vin#', value: 'vin' },
-      { text: 'Model', value: 'model' },
-      { text: 'Make', value: 'make' },
+      { text: '', align: 'left', value: 'check', sortable: false },
+      { text: 'No', align: 'left', value: 'no', sortable: false },
+      { text: 'Vin#', value: 'vin', sortable: false },
+      { text: 'Model', value: 'model', sortable: false },
+      { text: 'Make', value: 'make', sortable: false },
       { text: 'Year', value: 'year' },
       { text: 'MSRP', value: 'msrp' },
       { text: 'Status', value: 'status' },
       { text: 'Booked', value: 'booked' },
-      { text: 'Listed', value: 'listed' },
+      { text: 'Listed', value: 'listed' }
     ],
-    inventories: [
-      {
-        no: 1,
-        vin: 'Frozen Yogurt',
-        model: 159,
-        make: 6.0,
-        year: 24,
-        msrp: 4.0,
-        status: '1%',
-        booked: '1%',
-        listed: '1%'
-      }
-    ],
-    checkbox:[
-
-    ],
-    no: 1,
-    vin: 'Frozen Yogurt',
-    model: 159,
-    make: 6.0,
-    year: 24,
-    msrp: 4.0,
-    status: '1%',
-    booked: '1%',
-    listed: '1%'
-
+    inventories: [],
+    checkbox: [],
+    vin: 'MNBUMF050FW496402',
+    model: '320i',
+    make: 'BMW',
+    year: '2014',
+    msrp: '147,000',
+    status: 'ordered',
+    booked: 'y',
+    listed: 'n'
   }),
-  props: {
-    source: String
-  },
   mounted () {
-    axios({
-        method: 'get',
-        url: 'http://127.0.0.1:8081/inventory',
-        config: { headers: {'Content-Type': 'multipart/form-data' }}
-      }).then(response => {
-        this.inventories = response.data.Data
-      })
+    this.getInventory()
   },
   methods: {
-    checkboxChaged (no) {
-
+    initForm () {
+      this.vin = ''
+      this.model = ''
+      this.make = ''
+      this.year = ''
+      this.msrp = ''
+      this.status = ''
+      this.booked = ''
+      this.listed = ''
+    },
+    getInventory () {
+      axios({
+        method: 'get',
+        url: 'http://127.0.0.1:8081/inventory',
+        config: { headers: { 'Content-Type': 'multipart/form-data' } }
+      }).then(response => {
+        this.inventories = response.data.Data
+        // eslint-disable-next-line
+        for (let i of this.inventories) {
+          this.checkbox.push(false)
+        }
+      }).catch(error => { console.error(error) })
     },
     submit () {
-      var bodyFormData = new FormData();
-      bodyFormData.set('vin', this.vin);
-      bodyFormData.set('model', this.model);
-      bodyFormData.set('make', this.make);
-      bodyFormData.set('year', this.year);
-      bodyFormData.set('msrp', this.msrp);
-      bodyFormData.set('status', this.status);
-      bodyFormData.set('booked', this.booked);
-      bodyFormData.set('listed', this.listed);
-
+      var bodyFormData = new FormData()
+      bodyFormData.set('vin', this.vin)
+      bodyFormData.set('model', this.model)
+      bodyFormData.set('make', this.make)
+      bodyFormData.set('year', this.year)
+      bodyFormData.set('msrp', this.msrp)
+      bodyFormData.set('status', this.status)
+      bodyFormData.set('booked', this.booked)
+      bodyFormData.set('listed', this.listed)
       axios({
         method: 'post',
         url: 'http://127.0.0.1:8081/inventory/add',
         data: bodyFormData,
-        config: { headers: {'Content-Type': 'multipart/form-data' }}
-      }).then(response => {console.log(response)})
-
-      this.$refs.form.reset();
-      this.dialog = false;
+        config: { headers: { 'Content-Type': 'multipart/form-data' } }
+      }).then(response => {
+        console.log(response)
+        this.checkbox = []
+        this.getInventory()
+      }).catch(error => { console.error(error) })
+      this.initForm()
+      this.dialog = false
+    },
+    cancel () {
+      this.initForm()
+      this.dialog = false
     },
     deleteInventory () {
-
+      let vins = []
+      for (let [index, c] of this.checkbox.entries()) {
+        if (c === true) {
+          vins.push(this.inventories[index].vin)
+        }
+      }
+      axios.post('http://127.0.0.1:8081/inventory/delete', {
+        'vins': vins
+      })
+        .then(response => {
+          console.log(response)
+          this.checkbox = []
+          this.getInventory()
+        })
+        .catch(error => { console.error(error) })
     },
     movePage (dest) {
-      if(dest == 'inventory') this.$router.replace(dest);
+      if (dest === 'inventory') this.$router.replace('/')
     },
     createPdf () {
       var columns = [
-        {title: 'ID', dataKey: 'id'},
-        {title: 'Name', dataKey: 'name'},
-        {title: 'Country', dataKey: 'country'}
+        { title: 'Vin#', dataKey: 'vin' },
+        { title: 'Model', dataKey: 'model' },
+        { title: 'Make', dataKey: 'make' },
+        { title: 'Year', dataKey: 'year' },
+        { title: 'MSRP', dataKey: 'msrp' },
+        { title: 'Status', dataKey: 'status' },
+        { title: 'Booked', dataKey: 'booked' },
+        { title: 'Listed', dataKey: 'listed' }
       ]
-      var rows = [
-        {'id': 1, 'name': 'Shaw', 'country': 'Tanzania'},
-        {'id': 2, 'name': 'Nelson', 'country': 'Kazakhstan'},
-        {'id': 3, 'name': 'Garcia', 'country': 'Madagascar'}
-      ]
-      var doc = new jsPDF('p', 'pt')
+      var rows = this.inventories
+      var doc = new JsPDF('p', 'pt')
       doc.autoTable(columns, rows, {
         styles: {fillColor: [100, 255, 255]},
         columnStyles: {
@@ -289,15 +304,15 @@ export default {
         },
         margin: {top: 60},
         addPageContent: function (data) {
-          doc.text('Header', 40, 30)
+          doc.text('Inventory', 40, 30)
         }
       })
-      var string = doc.output('datauristring');
+      var string = doc.output('datauristring')
       var iframe = "<iframe width='100%' height='100%' src='" + string + "'></iframe>"
-      var x = window.open();
-      x.document.open();
-      x.document.write(iframe);
-      x.document.close();
+      var x = window.open()
+      x.document.open()
+      x.document.write(iframe)
+      x.document.close()
     }
   }
 }
